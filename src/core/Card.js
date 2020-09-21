@@ -1,23 +1,28 @@
-import React from 'react';
+import React,{useState} from 'react';
 import ImageHelper from "./helper/ImagHelper";
 import {Redirect} from "react-router-dom";
 import { addItemToCart, removeItemFromCart } from './helper/cartHelper';
+import {isAuthenticated} from "../auth/helper"
 
-const isAuthenticated = true;
+
 
 const Card = ({
     product,
     addtoCart = true,
     removefromCart = false,
+    reload = undefined,
+    setReload = f => f,
 }) => {
+
+     const [redirect, setRedirect] = useState(false)
 
     const cartTitle = product ? product.name : "Default image";
     const cartDescription = product ? product.description : "Default description"
     const cartPrice = product ? product.price : "Default"
 
     const addToCart = () => {
-      if(isAuthenticated) {
-        addItemToCart(product, () => {})
+      if(isAuthenticated()) {
+        addItemToCart(product, () => setRedirect(true))
         console.log("Added to cart")
       }
       else{
@@ -49,7 +54,9 @@ const Card = ({
         removeFromCart && (
           <button
             onClick={() => {
-              removeItemFromCart(product.id)
+              removeItemFromCart(product.id);
+              setReload(!reload)
+
               console.log("Product has been removed")
             }}
             className="btn btn-block btn-outline-danger mt-2 mb-2"
@@ -65,9 +72,10 @@ const Card = ({
       <div className="card text-white bg-dark border border-info ">
         <div className="card-header lead">{cartTitle}</div>
         <div className="card-body">
-            <ImageHelper product={product}/>
+          {getAredirect(redirect)}
+          <ImageHelper product={product}/>
 
-            <p className="lead bg-success font-weight-normal text-wrap">
+          <p className="lead bg-success font-weight-normal text-wrap">
             {cartDescription}
           </p>
           <p className="btn btn-success rounded  btn-sm px-4">$ {cartPrice}</p>
